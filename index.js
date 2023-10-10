@@ -10,6 +10,7 @@ app.use(express.static('dist'))
 // show content of post request
 morgan.token('content', function (req, res) { return JSON.stringify(req.body)})
 
+
 app.use(morgan(function (tokens, req, res) {
 	return [
 		tokens.method(req, res),
