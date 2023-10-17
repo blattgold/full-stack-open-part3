@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
+const Person = require('./models/person')
 
 app.use(express.json())
 app.use(cors())
@@ -9,7 +11,6 @@ app.use(express.static('dist'))
 
 // show content of post request
 morgan.token('content', function (req, res) { return JSON.stringify(req.body)})
-
 
 app.use(morgan(function (tokens, req, res) {
 	return [
@@ -46,7 +47,9 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-	response.json(persons)
+	Person.find({}).then(persons => {
+		response.json(persons)
+	})
 })
 
 const generateId = () => {
@@ -69,19 +72,15 @@ app.post('/api/persons', (request, response) => {
 		})
 	}
 
-	if (persons.some(person => person.name === body.name)) {
-		return response.status(400).json({
-			error: 'name must be unique'
-		})
-	}
-
-	const person = {
+	const person = new Person({
 		name: body.name,
 		number: body.number,
-		id: generateId(),
-	}
+	})
 
-	persons = persons.concat(person)
+	person.save()
+		.then(result => {
+			console.log('added new number to database')
+		})
 
 	response.json(person)
 })
@@ -111,7 +110,7 @@ app.get('/info', (request, response) => {
 	response.send(`<p>${phonebookSize}</p><p>${timeStamp}</p>`)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`)
 })
