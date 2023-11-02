@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.static('dist'))
 
 // show content of post request
-morgan.token('content', function (req, res) { return JSON.stringify(req.body)})
+morgan.token('content', (req) => { return JSON.stringify(req.body)})
 
 app.use(morgan(function (tokens, req, res) {
 	return [
@@ -39,8 +39,7 @@ app.post('/api/persons', (request, response, next) => {
 	})
 
 	person.save()
-		.then(result => {
-			console.log('added new number to database')
+		.then(() => {
 			response.json(person)
 		})
 		.catch(error => next(error))
@@ -61,8 +60,8 @@ app.get('/api/persons/:id', (request, response, next) => {
 app.put('/api/persons/:id', (request, response, next) => {
 	const body = request.body
 
-	Person.findByIdAndUpdate(request.params.id, 
-		{ number: body.number }, 
+	Person.findByIdAndUpdate(request.params.id,
+		{ number: body.number },
 		{ new: true, runValidators: true, context: 'query' }
 	)
 		.then(result => {
@@ -73,7 +72,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
 	Person.findByIdAndRemove(request.params.id)
-		.then(result => {
+		.then(() => {
 			response.status(204).end()
 		})
 		.catch(error => next(error))
@@ -83,7 +82,7 @@ app.get('/info', (request, response) => {
 	Person.count({})
 		.then(result => {
 			const phonebookSize = `Phonebook has info for ${result} people`
-			const timeStamp = Date().toString() 
+			const timeStamp = Date().toString()
 
 			response.send(`<p>${phonebookSize}</p><p>${timeStamp}</p>`)
 		})
